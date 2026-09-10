@@ -1,7 +1,7 @@
-Extension { #name : 'RBAddMethodChange' }
+Extension { #name : 'ReAddMethodChange' }
 
 { #category : '*ChangesBuilder' }
-RBAddMethodChange >> oldVersionTextToDisplay [
+ReAddMethodChange >> oldVersionTextToDisplay [
 
 	| class |
 	class := Smalltalk
@@ -16,6 +16,6 @@ RBAddMethodChange >> oldVersionTextToDisplay [
 ]
 
 { #category : '*ChangesBuilder' }
-RBAddMethodChange >> textToDisplay [
+ReAddMethodChange >> textToDisplay [
 	^ '"' , self protocol , '"' , String cr , self source
 ]

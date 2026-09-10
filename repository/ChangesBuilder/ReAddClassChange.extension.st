@@ -1,7 +1,7 @@
-Extension { #name : 'RBAddClassChange' }
+Extension { #name : 'ReAddClassChange' }
 
 { #category : '*ChangesBuilder' }
-RBAddClassChange >> oldVersionTextToDisplay [
+ReAddClassChange >> oldVersionTextToDisplay [
 
 	^ Smalltalk
 		  at: className
@@ -10,7 +10,7 @@ RBAddClassChange >> oldVersionTextToDisplay [
 ]
 
 { #category : '*ChangesBuilder' }
-RBAddClassChange >> textToDisplay [
+ReAddClassChange >> textToDisplay [
 
 	^ (ClassDefinitionPrinter for: (CBAddClassPrintAdaptor for: self))
 		  classDefinitionString

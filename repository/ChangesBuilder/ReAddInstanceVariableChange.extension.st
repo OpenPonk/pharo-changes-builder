@@ -1,7 +1,7 @@
-Extension { #name : 'RBAddInstanceVariableChange' }
+Extension { #name : 'ReAddInstanceVariableChange' }
 
 { #category : '*ChangesBuilder' }
-RBAddInstanceVariableChange >> oldVersionTextToDisplay [
+ReAddInstanceVariableChange >> oldVersionTextToDisplay [
 	| class |
 	class := Smalltalk at: className asSymbol ifAbsent: [ ^ super oldVersionTextToDisplay ].
 	self isMeta
