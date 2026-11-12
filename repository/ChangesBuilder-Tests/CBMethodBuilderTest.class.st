@@ -4,9 +4,9 @@ Class {
 	#instVars : [
 		'builder'
 	],
-	#category : 'ChangesBuilder-Tests',
-	#package : 'ChangesBuilder',
-	#tag : 'Tests'
+	#category : 'ChangesBuilder-Tests-Model',
+	#package : 'ChangesBuilder-Tests',
+	#tag : 'Model'
 }
 
 { #category : 'tests' }

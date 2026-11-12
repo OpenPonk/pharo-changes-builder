@@ -1,9 +1,9 @@
 Class {
 	#name : 'CBSymbolTest',
 	#superclass : 'TestCase',
-	#category : 'ChangesBuilder-Tests',
-	#package : 'ChangesBuilder',
-	#tag : 'Tests'
+	#category : 'ChangesBuilder-Tests-Utilities',
+	#package : 'ChangesBuilder-Tests',
+	#tag : 'Utilities'
 }
 
 { #category : 'tests' }

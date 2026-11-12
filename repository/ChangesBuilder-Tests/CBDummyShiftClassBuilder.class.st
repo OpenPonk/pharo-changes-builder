@@ -1,9 +1,9 @@
 Class {
 	#name : 'CBDummyShiftClassBuilder',
 	#superclass : 'ShiftClassBuilder',
-	#category : 'ChangesBuilder-Tests',
-	#package : 'ChangesBuilder',
-	#tag : 'Tests'
+	#category : 'ChangesBuilder-Tests-Model',
+	#package : 'ChangesBuilder-Tests',
+	#tag : 'Model'
 }
 
 { #category : 'building' }

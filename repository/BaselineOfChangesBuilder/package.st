@@ -1,1 +1,1 @@
-Package { #name : #BaselineOfChangesBuilder }
+Package { #name : 'BaselineOfChangesBuilder' }
