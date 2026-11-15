@@ -14,65 +14,58 @@ CBNautilusRefactoringChangesTest >> methodForTest [
 	"do not delete me, I am used in #testMethodNotChanged"
 ]
 
+{ #category : 'support' }
+CBNautilusRefactoringChangesTest >> newSelfCBClass [
+
+	^ CBClass new
+		  name: self class name;
+		  parent: self class superclass name;
+		  package: self class packageName;
+		  tag: (CBClass packageTagNameFor: self class);
+		  yourself
+]
+
 { #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testAddMetaVarChanged [
+
 	| cls change |
-	cls := CBClass new
-		name: #CBNautilusRefactoringChangesTest;
-		parent: #TestCase.
+	cls := self newSelfCBClass.
 	cls addMetaInstVarNamed: 'var1'.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
-	self deny: change textToDisplay = change oldVersionTextToDisplay.
-	self assert: (CBChangeSet new addClass: cls) refactoringChanges isNotEmpty
+	self deny: change textToDisplay equals: change oldVersionTextToDisplay.
+	self denyEmpty: (CBChangeSet new addClass: cls) refactoringChanges
 ]
 
 { #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testAddMetaVarNotChanged [
 
 	| cls changes |
-	cls := CBClass new
-		       name: #CBNautilusRefactoringChangesTest;
-		       parent: #TestCase;
-		       package: 'ChangesBuilder';
-		       tag: 'Tests'.
+	cls := self newSelfCBClass.
 	cls addMetaInstVarNamed: 'metaVar1'.
 	changes := (CBChangeSet new addClass: cls) allRefactoringChanges.
-	changes do: [ :change |
-			self
-				assert: change textToDisplay
-				equals: change oldVersionTextToDisplay ].
-	self
-		assertCollection: (CBChangeSet new addClass: cls) refactoringChanges
-		hasSameElements: #(  )
+	changes do: [ :change | self assert: change textToDisplay equals: change oldVersionTextToDisplay ].
+	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
 ]
 
 { #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testClassChanged [
+
 	| cls change |
-	cls := CBClass new
-		name: #CBNautilusRefactoringChangesTest;
-		parent: #TestCase.
+	cls := self newSelfCBClass.
 	cls addInstVarNamed: 'var1'.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges first.
-	self deny: change textToDisplay = change oldVersionTextToDisplay.
-	self assert: (CBChangeSet new addClass: cls) refactoringChanges isNotEmpty
+	self deny: change textToDisplay equals: change oldVersionTextToDisplay.
+	self denyEmpty: (CBChangeSet new addClass: cls) refactoringChanges
 ]
 
 { #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testClassNotChanged [
 
 	| cls change |
-	cls := CBClass new
-		       name: #CBNautilusRefactoringChangesTest;
-		       parent: #TestCase;
-		       package: 'ChangesBuilder';
-		       tag: 'Tests'.
+	cls := self newSelfCBClass.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges first.
-	self
-		assert: change textToDisplay
-		equals: change oldVersionTextToDisplay.
-	self assert:
-		(CBChangeSet new addClass: cls) refactoringChanges isEmpty
+	self assert: change textToDisplay equals: change oldVersionTextToDisplay.
+	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
 ]
 
 { #category : 'tests' }
@@ -84,22 +77,41 @@ CBNautilusRefactoringChangesTest >> testExample [
 
 { #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testMethodChanged [
+
 	| cls change |
-	cls := CBClass new name: self class name.
-	cls compile: 'methodForTest
-	"do not delete me, I am used in #testMethodNotChanged"' classified: 'not support'.
+	cls := self newSelfCBClass.
+	cls
+		compile: 'methodForTest
+	"do not delete me, I am used in #testMethodNotChanged"'
+		classified: 'not support'.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
-	self deny: change textToDisplay = change oldVersionTextToDisplay.
-	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 2
+	self deny: change textToDisplay equals: change oldVersionTextToDisplay.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
 ]
 
 { #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testMethodNotChanged [
+
 	| cls change |
-	cls := CBClass new name: self class name.
-	cls compile: 'methodForTest
-	"do not delete me, I am used in #testMethodNotChanged"' classified: 'support'.
+	cls := self newSelfCBClass.
+	cls
+		compile: 'methodForTest
+	"do not delete me, I am used in #testMethodNotChanged"'
+		classified: 'support'.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
 	self assert: change textToDisplay equals: change oldVersionTextToDisplay.
-	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
+	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testRootTagClassNotChanged [
+
+	| cls change |
+	cls := CBClass
+		       name: BaselineOfChangesBuilder name
+		       parent: BaselineOfChangesBuilder superclass name
+		       package: BaselineOfChangesBuilder packageName.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges first.
+	self assert: change textToDisplay equals: change oldVersionTextToDisplay.
+	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
 ]

@@ -205,13 +205,31 @@ CBClassTest >> testCreate [
 
 { #category : 'tests' }
 CBClassTest >> testFromRealClass [
-	| realClass |
+
+	| realClass adaptorClass |
 	realClass := self class.
 	class := CBClass fromClass: realClass.
 	self assert: class instVarNames equals: realClass instVarNames.
 	self assert: class parent equals: realClass superclass name.
 	self assert: class packageName equals: realClass packageName.
-	self assert: class packageTag equals: realClass packageTag
+	self assert: class packageTag isString description: 'packageTag copied from real class must be a String'.
+	self assert: class packageTag equals: realClass packageTagName asString.
+	self assert: (CBChangeSet new addClass: class) allRefactoringChanges size equals: 1.
+	adaptorClass := CBClass fromClass: CBAddClassPrintAdaptor.
+	self assertEmpty: (CBChangeSet new addClass: adaptorClass) refactoringChanges
+]
+
+{ #category : 'tests' }
+CBClassTest >> testFromRealClassWithRootTag [
+
+	| realClass |
+	realClass := BaselineOfChangesBuilder.
+	class := CBClass fromClass: realClass.
+	self assert: class parent equals: realClass superclass name.
+	self assert: class packageName equals: realClass packageName.
+	self assert: class packageTag equals: ''.
+	self assert: class categoryName equals: realClass packageName.
+	self assertEmpty: (CBChangeSet new addClass: class) refactoringChanges
 ]
 
 { #category : 'tests - accessing' }

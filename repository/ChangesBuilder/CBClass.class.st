@@ -31,7 +31,7 @@ CBClass class >> fromClass: aRealClass [
 		name: aRealClass name;
 		parent: aRealClass superclass name;
 		packageName: aRealClass packageName;
-		tag: aRealClass packageTag.
+		tag: (self packageTagNameFor: aRealClass).
 	aRealClass instanceVariables do: [ :each |
 			each isString
 				ifTrue: [ class addInstVarNamed: each ]
@@ -66,6 +66,14 @@ CBClass class >> name: aString parent: aClass package: aPkgName tag: aTagName [
 		  packageName: aPkgName;
 		  tag: aTagName;
 		  yourself
+]
+
+{ #category : 'accessing' }
+CBClass class >> packageTagNameFor: aRealClass [
+
+	^ aRealClass packageTag isRoot
+		  ifTrue: [ '' ]
+		  ifFalse: [ aRealClass packageTagName asString ]
 ]
 
 { #category : 'adding' }
