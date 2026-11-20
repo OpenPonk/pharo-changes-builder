@@ -82,7 +82,8 @@ CBChangeSet >> browseChanges [
 
 { #category : 'actions' }
 CBChangeSet >> browseChangesIfAny [
-	self refactoringChanges ifEmpty: [ ^ self inform: 'No changes' ].
+
+	self refactoringChanges ifEmpty: [ ^ InformativeNotification signal: 'No changes' ].
 	^ self browseChanges
 ]
 
@@ -117,6 +118,6 @@ CBChangeSet >> initialize [
 
 { #category : 'converting' }
 CBChangeSet >> refactoringChanges [
-	^ self allRefactoringChanges
-		reject: [ :each | each textToDisplay = each oldVersionTextToDisplay ]
+
+	^ self allRefactoringChanges reject: [ :each | each cbTextToDisplay = each cbOldVersionTextToDisplay ]
 ]

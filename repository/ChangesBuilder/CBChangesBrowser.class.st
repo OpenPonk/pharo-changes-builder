@@ -17,6 +17,16 @@ CBChangesBrowser >> accept [
 	self withWindowDo: [ :window | window close ]
 ]
 
+{ #category : 'private' }
+CBChangesBrowser >> buildDiffFor: aChange [
+
+	^ aChange ifNil: [ '' ] ifNotNil: [
+			  diffView
+				  contextClass: aChange changeClass;
+				  leftText: aChange cbOldVersionTextToDisplay;
+				  rightText: aChange cbTextToDisplay ]
+]
+
 { #category : 'initialization' }
 CBChangesBrowser >> initializeDialogWindow: aWindow [
 

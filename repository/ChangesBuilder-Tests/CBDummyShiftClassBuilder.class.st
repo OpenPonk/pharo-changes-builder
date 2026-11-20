@@ -1,3 +1,6 @@
+"
+Test double subclassing ShiftClassBuilder that raises an error if any class-installation or build step is invoked prematurely, ensuring class definitions under test only configure builder metadata without mutating the system.
+"
 Class {
 	#name : 'CBDummyShiftClassBuilder',
 	#superclass : 'ShiftClassBuilder',

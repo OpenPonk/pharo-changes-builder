@@ -1,21 +1,30 @@
 Extension { #name : 'ReAddMethodChange' }
 
 { #category : '*ChangesBuilder' }
-ReAddMethodChange >> oldVersionTextToDisplay [
+ReAddMethodChange >> cbOldVersionTextToDisplay [
 
 	| class |
-	class := Smalltalk
-		         at: className asSymbol
-		         ifAbsent: [ ^ super oldVersionTextToDisplay ].
+	class := Smalltalk at: className asSymbol ifAbsent: [ ^ '' ].
 	isMeta ifTrue: [ class := class classSide ].
-	^ class methodDict
-		  at: self selector
+	^ class
+		  compiledMethodAt: self selector
 		  ifPresent: [ :method |
-			  '"' , method protocolName , '"' , String cr , method sourceCode ]
-		  ifAbsent: [ super oldVersionTextToDisplay ]
+				  String streamContents: [ :stream |
+						  stream << '"'.
+						  stream << method protocolName.
+						  stream << '"'.
+						  stream cr.
+						  stream << method sourceCode ] ]
+		  ifAbsent: [ '' ]
 ]
 
 { #category : '*ChangesBuilder' }
-ReAddMethodChange >> textToDisplay [
-	^ '"' , self protocol , '"' , String cr , self source
+ReAddMethodChange >> cbTextToDisplay [
+
+	^ String streamContents: [ :stream |
+			  stream << '"'.
+			  stream << self protocol.
+			  stream << '"'.
+			  stream cr.
+			  stream << self source ]
 ]

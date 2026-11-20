@@ -2,13 +2,8 @@ Extension { #name : 'ReCommentChange' }
 
 { #category : '*ChangesBuilder' }
 ReCommentChange >> oldVersionTextToDisplay [
-	| cls |
-	(Smalltalk hasClassNamed: className)
-		ifFalse: [ ^ '' ].
-	cls := Smalltalk classNamed: className.
-	^ cls hasComment
-		ifTrue: [ cls comment ]
-		ifFalse: [ '' ]
+
+	^ Smalltalk at: className asSymbol ifPresent: [ :cls | cls comment ] ifAbsent: [ '' ]
 ]
 
 { #category : '*ChangesBuilder' }

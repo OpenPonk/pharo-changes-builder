@@ -2,7 +2,6 @@ Class {
 	#name : 'CBClassTest',
 	#superclass : 'TestCase',
 	#instVars : [
-		'result',
 		'class'
 	],
 	#category : 'ChangesBuilder-Tests-Model',
@@ -18,25 +17,30 @@ CBClassTest >> setUp [
 
 { #category : 'tests - adding' }
 CBClassTest >> testAddClassVariable [
+
 	class addClassVarNamed: 'something'.
-	self assert: class classVariables equals: #(something).
-	self assert: class classVarNames equals: #(something).
-	self assert: (class hasClassVarNamed: 'something')
+	self assert: class classVariables equals: #( something ).
+	self assert: class classVarNames equals: #( something ).
+	self assert: (class hasClassVarNamed: 'something') description: 'Added class variable should be reported by hasClassVarNamed:'
 ]
 
 { #category : 'tests - adding' }
 CBClassTest >> testAddInstanceVariable [
+
 	class addInstVarNamed: 'something'.
-	self assert: class instanceVariables equals: #(something).
-	self assert: class instVarNames equals: #(something).
-	self assert: (class hasInstVarNamed: 'something')
+	self assert: class instanceVariables equals: #( something ).
+	self assert: class instVarNames equals: #( something ).
+	self assert: (class hasInstVarNamed: 'something') description: 'Added instance variable should be reported by hasInstVarNamed:'
 ]
 
 { #category : 'tests - adding' }
 CBClassTest >> testAddMetaInstanceVariable [
+
 	class addMetaInstVarNamed: 'something'.
-	self assert: class metaInstanceVariables equals: #(something).
-	self assert: (class hasMetaInstVarNamed: 'something')
+	self assert: class metaInstanceVariables equals: #( something ).
+	self
+		assert: (class hasMetaInstVarNamed: 'something')
+		description: 'Added meta instance variable should be reported by hasMetaInstVarNamed:'
 ]
 
 { #category : 'tests - adding' }
@@ -197,10 +201,12 @@ CBClassTest >> testCompileMethod [
 
 { #category : 'tests' }
 CBClassTest >> testCreate [
-	result := CBClass name: 'MyClass' parent: 'Something' package: 'Generated'.
-	self assert: result name equals: 'MyClass'.
-	self assert: result parent equals: 'Something'.
-	self assert: result packageName equals: 'Generated'
+
+	| created |
+	created := CBClass name: 'MyClass' parent: 'Something' package: 'Generated'.
+	self assert: created name equals: 'MyClass'.
+	self assert: created parent equals: 'Something'.
+	self assert: created packageName equals: 'Generated'
 ]
 
 { #category : 'tests' }
@@ -217,6 +223,18 @@ CBClassTest >> testFromRealClass [
 	self assert: (CBChangeSet new addClass: class) allRefactoringChanges size equals: 1.
 	adaptorClass := CBClass fromClass: CBAddClassPrintAdaptor.
 	self assertEmpty: (CBChangeSet new addClass: adaptorClass) refactoringChanges
+]
+
+{ #category : 'tests' }
+CBClassTest >> testFromRealClassCopiesClassAndMetaVariables [
+
+	| classWithClassVars classWithMetaVars |
+	classWithClassVars := CBClass fromClass: Float.
+	self assertCollection: classWithClassVars classVarNames hasSameElements: Float classVarNames.
+	classWithMetaVars := CBClass fromClass: CBNautilusRefactoringChangesTest.
+	self
+		assertCollection: classWithMetaVars metaInstanceVariables
+		hasSameElements: CBNautilusRefactoringChangesTest class instVarNames
 ]
 
 { #category : 'tests' }
@@ -239,12 +257,40 @@ CBClassTest >> testPackage [
 	self assert: class packageName equals: 'Wherever'
 ]
 
+{ #category : 'tests' }
+CBClassTest >> testPackageTagAndCategoryName [
+
+	class packageTag: 'SubTag'.
+	self assert: class packageTag equals: 'SubTag'.
+	self assert: class categoryName equals: 'GeneratedCode-SubTag'.
+	class packageTag: ''.
+	self assert: class categoryName equals: 'GeneratedCode'.
+	class packageTag: nil.
+	self assert: class categoryName equals: 'GeneratedCode'
+]
+
 { #category : 'tests - accessing' }
 CBClassTest >> testParent [
 	class := CBClass new.
 	self assert: class parent equals: 'Object'.
 	class parent: 'TestCase'.
 	self assert: class parent equals: 'TestCase'
+]
+
+{ #category : 'tests' }
+CBClassTest >> testPrintOn [
+
+	| multiVarOutput |
+	class addMethod: (CBMethod new getter: 'first').
+	class addInstVarNamed: 'first'.
+	self assert: class printString equals: 'a CBClass(''MyXXTestClass'', a(first),m(1))'.
+	class addInstVarNamed: 'second'.
+	multiVarOutput := class printString.
+	self
+		assert:
+			(#( 'a CBClass(''MyXXTestClass'', a(first,second),m(1))' 'a CBClass(''MyXXTestClass'', a(second,first),m(1))' ) includes:
+				 multiVarOutput)
+		description: 'printOn: should separate multiple instance variables with commas'
 ]
 
 { #category : 'tests - accessing' }

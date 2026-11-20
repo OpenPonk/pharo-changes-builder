@@ -58,6 +58,65 @@ CBChangeSetTest >> testAddMetaClassChanges [
 ]
 
 { #category : 'tests' }
+CBChangeSetTest >> testAllRefactoringChangesIncludesComment [
+
+	| class commentChange |
+	class := CBClass new
+		         name: 'GeneratedClass';
+		         comment: 'Generated class comment';
+		         yourself.
+	changeSet addClass: class.
+	commentChange := changeSet allRefactoringChanges second.
+	self assert: commentChange class equals: ReCommentChange.
+	self assert: commentChange cbTextToDisplay equals: 'Generated class comment'
+]
+
+{ #category : 'tests' }
+CBChangeSetTest >> testBrowseChangesIfAnyWhenEmptySignalsInformativeNotification [
+
+	| message deprecated |
+	message := nil.
+	deprecated := false.
+	[
+		[ changeSet browseChangesIfAny ]
+			on: InformativeNotification
+			do: [ :notification | message := notification messageText ] ]
+		on: Deprecation
+		do: [ :ex |
+				deprecated := true.
+				ex resume ].
+	self deny: deprecated description: 'browseChangesIfAny should not use deprecated Object>>#inform:'.
+	self assert: message equals: 'No changes'
+]
+
+{ #category : 'tests' }
+CBChangeSetTest >> testBrowseChangesIfAnyWhenNonEmptyOpensBrowserWindow [
+
+	| class browser |
+	class := CBClass new name: 'GeneratedBrowserTestClass'.
+	changeSet addClass: class.
+	browser := changeSet browseChangesIfAny.
+	[
+		self
+			assert: (browser isKindOf: CBChangesBrowser)
+			description: 'browseChangesIfAny should return a CBChangesBrowser when changes exist'.
+		self assert: browser window isOpen description: 'browseChangesIfAny should open a browser window when changes exist' ] ensure: [
+		browser window close ]
+]
+
+{ #category : 'tests' }
+CBChangeSetTest >> testBrowseChangesOpensBrowserWindow [
+
+	| class browser |
+	class := CBClass new name: 'GeneratedBrowserTestClass'.
+	changeSet addClass: class.
+	browser := changeSet browseChanges.
+	[
+		self assert: (browser isKindOf: CBChangesBrowser) description: 'browseChanges should return a CBChangesBrowser'.
+		self assert: browser window isOpen description: 'browseChanges should open a browser window' ] ensure: [ browser window close ]
+]
+
+{ #category : 'tests' }
 CBChangeSetTest >> testClassNamed [
 	| class |
 	class := changeSet classNamed: 'Unit'.
@@ -67,10 +126,11 @@ CBChangeSetTest >> testClassNamed [
 
 { #category : 'tests' }
 CBChangeSetTest >> testClassNamedSame [
+
 	| classA classB |
 	classA := changeSet classNamed: 'Unit'.
 	classB := changeSet classNamed: 'Unit'.
-	self assert: classA == classB
+	self assert: classA identicalTo: classB
 ]
 
 { #category : 'tests' }
@@ -84,8 +144,8 @@ CBChangeSetTest >> testClassWithMetaMethodChanges [
 	changeSet addClass: class.
 	self assert: changeSet classes equals: { class }.
 	methodRefactoring := changeSet allRefactoringChanges second.
-	self assert: methodRefactoring isMeta.
-	self assert: methodRefactoring textToDisplay equals: '"my protocol"
+	self assert: methodRefactoring isMeta description: 'Meta method refactoring change should target class side'.
+	self assert: methodRefactoring cbTextToDisplay equals: '"my protocol"
 meth ^ 1'
 ]
 
@@ -99,9 +159,7 @@ CBChangeSetTest >> testClassWithMethodChanges [
 			 protocolName: 'my protocol').
 	changeSet addClass: class.
 	self assert: changeSet classes equals: { class }.
-	self
-		assert: changeSet allRefactoringChanges second textToDisplay
-		equals: '"my protocol"
+	self assert: changeSet allRefactoringChanges second cbTextToDisplay equals: '"my protocol"
 meth ^ 1'
 ]
 
@@ -114,4 +172,14 @@ CBChangeSetTest >> testFromRealClass [
 	self assert: class instVarNames equals: realClass instVarNames.
 	self assert: class parent equals: realClass superclass name.
 	self assert: changeSet classes asArray equals: { class }
+]
+
+{ #category : 'tests' }
+CBChangeSetTest >> testFromRealClassReturnsExistingInstance [
+
+	| first second |
+	first := changeSet fromRealClass: self class.
+	second := changeSet fromRealClass: self class.
+	self assert: second identicalTo: first.
+	self assert: changeSet classes asArray equals: { first }
 ]

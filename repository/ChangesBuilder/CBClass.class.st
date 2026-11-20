@@ -32,18 +32,9 @@ CBClass class >> fromClass: aRealClass [
 		parent: aRealClass superclass name;
 		packageName: aRealClass packageName;
 		tag: (self packageTagNameFor: aRealClass).
-	aRealClass instanceVariables do: [ :each |
-			each isString
-				ifTrue: [ class addInstVarNamed: each ]
-				ifFalse: [ class addInstVarSlot: each ] ].
-	aRealClass classVariables do: [ :each |
-			each isString
-				ifTrue: [ class addClassVarNamed: each ]
-				ifFalse: [ class addClassVar: each ] ].
-	aRealClass class instanceVariables do: [ :each |
-			each isString
-				ifTrue: [ class addMetaInstVarNamed: each ]
-				ifFalse: [ class addMetaInstVarSlot: each ] ].
+	aRealClass instanceVariables do: [ :each | class addInstVarSlot: each ].
+	aRealClass classVariables do: [ :each | class addClassVar: each ].
+	aRealClass class instanceVariables do: [ :each | class addMetaInstVarSlot: each ].
 	^ class
 ]
 
@@ -124,7 +115,10 @@ CBClass >> categoryName [
 
 	self packageTag ifNil: [ ^ self packageName ].
 	self packageTag ifEmpty: [ ^ self packageName ].
-	^ self packageName , '-' , self packageTag
+	^ String streamContents: [ :stream |
+			  stream << self packageName.
+			  stream << '-'.
+			  stream << self packageTag ]
 ]
 
 { #category : 'generating' }
@@ -292,18 +286,14 @@ CBClass >> parent: aClass [
 
 { #category : 'printing' }
 CBClass >> printOn: aStream [
+
 	super printOn: aStream.
-	aStream
-		<< '(';
-		<< name printString;
-		<< ', ';
-		<< 'a('.
+	aStream << '('.
+	aStream print: name.
+	aStream << ', a('.
 	instanceVariables do: [ :each | aStream << each ] separatedBy: [ aStream << ',' ].
-	aStream
-		<< '),';
-		<< 'm('.
-		aStream << methods size asString.
-"	methods keys do: [ :each | aStream << each ] separatedBy: [ aStream << ',' ]."
+	aStream << '),m('.
+	aStream print: methods size.
 	aStream << '))'
 ]
 

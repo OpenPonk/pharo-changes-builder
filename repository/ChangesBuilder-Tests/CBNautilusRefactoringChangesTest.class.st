@@ -10,6 +10,11 @@ Class {
 }
 
 { #category : 'support' }
+CBNautilusRefactoringChangesTest class >> metaMethodForTest [
+	"do not delete me, I am used in #testMetaMethodNotChanged"
+]
+
+{ #category : 'support' }
 CBNautilusRefactoringChangesTest >> methodForTest [
 	"do not delete me, I am used in #testMethodNotChanged"
 ]
@@ -48,6 +53,38 @@ CBNautilusRefactoringChangesTest >> testAddMetaVarNotChanged [
 ]
 
 { #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testAddMetaVarOnNewClassChanged [
+
+	| cls change |
+	cls := CBClass name: 'NonExistentGeneratedClassForChangesTest' parent: 'Object' package: 'GeneratedCode'.
+	cls addMetaInstVarNamed: 'metaVar1'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self assert: change oldVersionTextToDisplay equals: ''.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 2
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testChangesBrowserAcceptAndBuildDiffFor [
+
+	| cls change browser |
+	cls := self newSelfCBClass.
+	cls
+		compile: 'methodForTest
+	"do not delete me, I am used in #testMethodNotChanged"'
+		classified: 'not support'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	browser := CBChangesBrowser changes: #(  ).
+	self assert: (browser buildDiffFor: nil) equals: ''.
+	browser buildDiffFor: change.
+	browser open.
+	[
+		self assert: browser window isOpen description: 'CBChangesBrowser should open a window'.
+		browser accept.
+		self deny: browser window isOpen description: 'CBChangesBrowser>>#accept should close its window' ] ensure: [
+		browser window close ]
+]
+
+{ #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testClassChanged [
 
 	| cls change |
@@ -69,10 +106,89 @@ CBNautilusRefactoringChangesTest >> testClassNotChanged [
 ]
 
 { #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testCommentOnCommentedClassChanged [
+
+	| cls change |
+	cls := CBClass fromClass: CBAddClassPrintAdaptor.
+	cls comment: 'Updated comment'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self assert: change textToDisplay equals: 'Updated comment'.
+	self assert: change oldVersionTextToDisplay equals: CBAddClassPrintAdaptor comment.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testCommentOnCommentedClassNotChanged [
+
+	| cls change |
+	cls := CBClass fromClass: CBAddClassPrintAdaptor.
+	cls comment: CBAddClassPrintAdaptor comment.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self assert: change textToDisplay equals: CBAddClassPrintAdaptor comment.
+	self assert: change oldVersionTextToDisplay equals: CBAddClassPrintAdaptor comment.
+	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testCommentOnNewClassChanged [
+
+	| cls change |
+	cls := CBClass name: 'NonExistentGeneratedClassForChangesTest' parent: 'Object' package: 'GeneratedCode'.
+	cls comment: 'Fresh comment'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges second.
+	self assert: change textToDisplay equals: 'Fresh comment'.
+	self assert: change oldVersionTextToDisplay equals: ''.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 2
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testCommentOnUncommentedClassChanged [
+
+	| cls change |
+	cls := self newSelfCBClass.
+	cls comment: 'Added comment'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self assert: change textToDisplay equals: 'Added comment'.
+	self assert: change oldVersionTextToDisplay equals: ''.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
+]
+
+{ #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testExample [
-	| window |
-	window := CBChangeSet example.
-	window delete.
+
+	| browser |
+	browser := CBChangeSet example.
+	[
+		self assert: (browser isKindOf: CBChangesBrowser) description: 'CBChangeSet example should return a CBChangesBrowser'.
+		self assert: browser window isOpen description: 'CBChangeSet example should open a window' ] ensure: [ browser window close ]
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testMetaMethodChanged [
+
+	| cls change |
+	cls := self newSelfCBClass.
+	cls
+		compileMeta: 'metaMethodForTest
+	"do not delete me, I am used in #testMetaMethodNotChanged"'
+		classified: 'not support'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self deny: change cbTextToDisplay equals: change cbOldVersionTextToDisplay.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testMetaMethodNotChanged [
+
+	| cls change |
+	cls := self newSelfCBClass.
+	cls
+		compileMeta: 'metaMethodForTest
+	"do not delete me, I am used in #testMetaMethodNotChanged"'
+		classified: 'support'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self assert: change cbTextToDisplay equals: change cbOldVersionTextToDisplay.
+	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
 ]
 
 { #category : 'tests' }
@@ -85,7 +201,7 @@ CBNautilusRefactoringChangesTest >> testMethodChanged [
 	"do not delete me, I am used in #testMethodNotChanged"'
 		classified: 'not support'.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
-	self deny: change textToDisplay equals: change oldVersionTextToDisplay.
+	self deny: change cbTextToDisplay equals: change cbOldVersionTextToDisplay.
 	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
 ]
 
@@ -99,8 +215,39 @@ CBNautilusRefactoringChangesTest >> testMethodNotChanged [
 	"do not delete me, I am used in #testMethodNotChanged"'
 		classified: 'support'.
 	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
-	self assert: change textToDisplay equals: change oldVersionTextToDisplay.
+	self assert: change cbTextToDisplay equals: change cbOldVersionTextToDisplay.
 	self assertEmpty: (CBChangeSet new addClass: cls) refactoringChanges
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testNewMethodOnExistingClassChanged [
+
+	| cls change |
+	cls := self newSelfCBClass.
+	cls compile: 'brandNewNonExistentMethodForTest ^ 42' classified: 'accessing'.
+	change := (CBChangeSet new addClass: cls) allRefactoringChanges last.
+	self assert: change cbOldVersionTextToDisplay equals: ''.
+	self deny: change cbTextToDisplay equals: change cbOldVersionTextToDisplay.
+	self assert: (CBChangeSet new addClass: cls) refactoringChanges size equals: 1
+]
+
+{ #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testReMethodProtocolChangePreservesMethodSourceWithoutProtocolComment [
+
+	| change expectedSource expectedOldDiff expectedNewDiff |
+	change := ReMethodProtocolChange selector: #methodForTest in: self class classified: 'other'.
+	expectedSource := (self class >> #methodForTest) sourceCode.
+	expectedOldDiff := String streamContents: [ :stream |
+			                   stream << '"protocol: support"'.
+			                   stream cr.
+			                   stream << expectedSource ].
+	expectedNewDiff := String streamContents: [ :stream |
+			                   stream << '"protocol: other"'.
+			                   stream cr.
+			                   stream << expectedSource ].
+	self assert: change source equals: expectedSource.
+	self assert: change oldVersionTextToDisplay equals: expectedOldDiff.
+	self assert: change textToDisplay equals: expectedNewDiff
 ]
 
 { #category : 'tests' }

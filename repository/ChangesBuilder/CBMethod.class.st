@@ -88,25 +88,6 @@ CBMethod >> initialize [
 ]
 
 { #category : 'accessing' }
-CBMethod >> protocol [
-
-	self
-		deprecated: 'Use #protocolName instead'
-		transformWith: '`@receiver protocol' -> '`@receiver protocolName'.
-	^ self protocolName
-]
-
-{ #category : 'accessing' }
-CBMethod >> protocol: aProtocolName [
-
-	self
-		deprecated: 'Use #protocolName: instead'
-		transformWith:
-		'`@receiver protocol: `@arg' -> '`@receiver protocolName: `@arg'.
-	^ self protocolName: aProtocolName
-]
-
-{ #category : 'accessing' }
 CBMethod >> protocolName [
 	^ protocolName
 ]
@@ -159,16 +140,16 @@ CBMethod >> setter: aVariableName argument: anArgumentName delegateTo: aString [
 
 { #category : 'definition' }
 CBMethod >> setter: aVariableName argument: anArgumentName delegateTo: aString comment: aComment [
-	self protocol: 'accessing'.
-	self
-		source:
-			('<1s>: <2s>
+
+	aComment ifNil: [ ^ self setter: aVariableName argument: anArgumentName delegateTo: aString ].
+	self protocolName: 'accessing'.
+	self source: ('<1s>: <2s>
 	"<4s>"
 	<3s> <1s>: <2s>'
-				expandMacrosWith: aVariableName
-				with: (self asArgumentName: anArgumentName)
-				with: aString
-				with: (self asComment: aComment))
+			 expandMacrosWith: aVariableName
+			 with: (self asArgumentName: anArgumentName)
+			 with: aString
+			 with: (self asComment: aComment))
 ]
 
 { #category : 'accessing' }

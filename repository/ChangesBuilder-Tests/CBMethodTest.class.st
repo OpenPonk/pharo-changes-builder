@@ -40,6 +40,15 @@ CBMethodTest >> testGetter [
 ]
 
 { #category : 'tests' }
+CBMethodTest >> testGetterDelegateFrom [
+
+	method := CBMethod new getter: 'var' delegateFrom: 'target'.
+	self assertMethod: method source equals: 'var
+	^ target var'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
 CBMethodTest >> testGetterWithComment [
 
 	method := CBMethod new getter: 'var' comment: 'comment'.
@@ -72,6 +81,24 @@ CBMethodTest >> testGetterWithDefaultValue [
 ]
 
 { #category : 'tests' }
+CBMethodTest >> testGetterWithNilComment [
+
+	method := CBMethod new getter: 'var' comment: nil.
+	self assertMethod: method source equals: 'var
+	^ var'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
+CBMethodTest >> testGetterWithNilCommentDefaultValue [
+
+	method := CBMethod new getter: 'var' comment: nil defaultValue: '12'.
+	self assertMethod: method source equals: 'var
+	^ var ifNil: [ var := 12 ]'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
 CBMethodTest >> testSelector [
 	method := CBMethod new source: 'a: aWhatever ^ nil'.
 	self assert: method selector equals: #a:
@@ -83,6 +110,50 @@ CBMethodTest >> testSetter [
 	method := CBMethod new setter: 'var' argument: 'variable'.
 	self assertMethod: method source equals: 'var: aVariable
 	var := aVariable'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
+CBMethodTest >> testSetterDelegateTo [
+
+	method := CBMethod new setter: 'var' argument: 'variable' delegateTo: 'target'.
+	self assertMethod: method source equals: 'var: aVariable
+	target var: aVariable'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
+CBMethodTest >> testSetterDelegateToWithComment [
+
+	| deprecated |
+	deprecated := false.
+	[
+		method := CBMethod new
+			          setter: 'var'
+			          argument: 'variable'
+			          delegateTo: 'target'
+			          comment: 'hello' ]
+		on: Deprecation
+		do: [ :ex |
+				deprecated := true.
+				ex resume ].
+	self deny: deprecated description: 'setter:argument:delegateTo:comment: should not trigger Deprecation'.
+	self assertMethod: method source equals: 'var: aVariable
+	"hello"
+	target var: aVariable'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
+CBMethodTest >> testSetterDelegateToWithNilComment [
+
+	method := CBMethod new
+		          setter: 'var'
+		          argument: 'variable'
+		          delegateTo: 'target'
+		          comment: nil.
+	self assertMethod: method source equals: 'var: aVariable
+	target var: aVariable'.
 	self assert: method protocolName equals: 'accessing'
 ]
 
@@ -100,8 +171,19 @@ CBMethodTest >> testSetterWithComment [
 ]
 
 { #category : 'tests' }
+CBMethodTest >> testSetterWithNilComment [
+
+	method := CBMethod new setter: 'var' argument: 'variable' comment: nil.
+	self assertMethod: method source equals: 'var: aVariable
+	var := aVariable'.
+	self assert: method protocolName equals: 'accessing'
+]
+
+{ #category : 'tests' }
 CBMethodTest >> testValidateSource [
-	self shouldnt: [ CBMethod new validateSource: 'a ^ 1' ] raise: CBSyntaxError
+
+	method := CBMethod new.
+	self assert: (method validateSource: 'a ^ 1') identicalTo: method
 ]
 
 { #category : 'tests' }

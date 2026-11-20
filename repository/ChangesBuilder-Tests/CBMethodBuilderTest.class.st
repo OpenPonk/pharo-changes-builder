@@ -11,10 +11,13 @@ Class {
 
 { #category : 'tests' }
 CBMethodBuilderTest >> testAddComment [
+
 	builder := CBMethodBuilder new.
 	builder addComment: 'hello'.
-	self assert: (builder asComment: 'text') equals: 'text'.
-	self assert: (builder asComment: 't"e"xt') equals: 't""e""xt'
+	builder addComment: 't"e"xt'.
+	self assert: builder source equals: '"hello"
+"t""e""xt"
+'
 ]
 
 { #category : 'tests' }
