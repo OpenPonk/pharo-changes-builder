@@ -16,7 +16,8 @@ Class {
 		'classVariables',
 		'methods',
 		'metaMethods',
-		'metaInstanceVariables'
+		'metaInstanceVariables',
+		'sortVariables'
 	],
 	#category : 'ChangesBuilder-Model',
 	#package : 'ChangesBuilder',
@@ -31,7 +32,8 @@ CBClass class >> fromClass: aRealClass [
 		name: aRealClass name;
 		parent: aRealClass superclass name;
 		packageName: aRealClass packageName;
-		tag: (self packageTagNameFor: aRealClass).
+		tag: (self packageTagNameFor: aRealClass);
+		sortVariables: false.
 	aRealClass instanceVariables do: [ :each | class addInstVarSlot: each ].
 	aRealClass classVariables do: [ :each | class addClassVar: each ].
 	aRealClass class instanceVariables do: [ :each | class addMetaInstVarSlot: each ].
@@ -75,12 +77,14 @@ CBClass >> addClassVar: aClassVar [
 
 { #category : 'adding' }
 CBClass >> addClassVarNamed: aString [
-	classVariables add: aString
+
+	(classVariables includes: aString) ifFalse: [ classVariables add: aString ]
 ]
 
 { #category : 'adding' }
 CBClass >> addInstVarNamed: aString [
-	instanceVariables add: aString
+
+	(instanceVariables includes: aString) ifFalse: [ instanceVariables add: aString ]
 ]
 
 { #category : 'adding' }
@@ -91,7 +95,8 @@ CBClass >> addInstVarSlot: aSlot [
 
 { #category : 'adding' }
 CBClass >> addMetaInstVarNamed: aString [
-	metaInstanceVariables add: aString
+
+	(metaInstanceVariables includes: aString) ifFalse: [ metaInstanceVariables add: aString ]
 ]
 
 { #category : 'adding' }
@@ -134,8 +139,8 @@ CBClass >> classDefinition [
 		  builder
 			  superclassName: parent;
 			  name: name;
-			  slots: self instanceVariables sorted;
-			  sharedVariables: self classVariables sorted;
+			  slots: (self orderedVariables: self instanceVariables);
+			  sharedVariables: (self orderedVariables: self classVariables);
 			  package: packageName;
 			  tag: tag ]
 ]
@@ -194,13 +199,15 @@ CBClass >> hasMetaInstVarNamed: aString [
 
 { #category : 'initialization' }
 CBClass >> initialize [
+
 	super initialize.
 	parent := 'Object'.
 	packageName := 'Unclassified'.
 	tag := ''.
-	instanceVariables := Set new.
-	classVariables := Set new.
-	metaInstanceVariables := Set new.
+	sortVariables := true.
+	instanceVariables := OrderedCollection new.
+	classVariables := OrderedCollection new.
+	metaInstanceVariables := OrderedCollection new.
 	methods := OrderedDictionary new.
 	metaMethods := OrderedDictionary new
 ]
@@ -243,6 +250,14 @@ CBClass >> name [
 { #category : 'accessing' }
 CBClass >> name: aString [
 	name := aString
+]
+
+{ #category : 'private' }
+CBClass >> orderedVariables: aCollection [
+
+	^ sortVariables
+		  ifTrue: [ aCollection sorted ]
+		  ifFalse: [ aCollection ]
 ]
 
 { #category : 'accessing' }
@@ -308,6 +323,18 @@ CBClass >> realClass [
 { #category : 'accessing' }
 CBClass >> selectors [
 	^ methods keys
+]
+
+{ #category : 'accessing' }
+CBClass >> sortVariables [
+
+	^ sortVariables
+]
+
+{ #category : 'accessing' }
+CBClass >> sortVariables: aBoolean [
+
+	sortVariables := aBoolean
 ]
 
 { #category : 'accessing' }

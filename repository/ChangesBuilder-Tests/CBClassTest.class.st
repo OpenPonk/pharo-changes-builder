@@ -62,6 +62,23 @@ CBClassTest >> testAddMethod [
 	self assert: (class methodNamed: #item) equals: method
 ]
 
+{ #category : 'tests - adding' }
+CBClassTest >> testAddVariablesIgnoresDuplicates [
+
+	class addInstVarNamed: 'second'.
+	class addInstVarNamed: 'first'.
+	class addInstVarNamed: 'second'.
+	self assert: class instVarNames equals: #( 'second' 'first' ).
+	class addClassVarNamed: 'SecondVar'.
+	class addClassVarNamed: 'FirstVar'.
+	class addClassVarNamed: 'SecondVar'.
+	self assert: class classVarNames equals: #( 'SecondVar' 'FirstVar' ).
+	class addMetaInstVarNamed: 'metaSecond'.
+	class addMetaInstVarNamed: 'metaFirst'.
+	class addMetaInstVarNamed: 'metaSecond'.
+	self assert: class metaInstanceVariables equals: #( 'metaSecond' 'metaFirst' )
+]
+
 { #category : 'tests' }
 CBClassTest >> testClassDefinition [
 
@@ -238,6 +255,28 @@ CBClassTest >> testFromRealClassCopiesClassAndMetaVariables [
 ]
 
 { #category : 'tests' }
+CBClassTest >> testFromRealClassPreservesVariableOrderAndProducesNoChanges [
+
+	| cbClassModel floatModel builder |
+	self assert: class sortVariables description: 'Newly created CBClass should sort variables by default'.
+	cbClassModel := CBClass fromClass: CBClass.
+	self deny: cbClassModel sortVariables description: 'CBClass copied from an existing class should preserve variable order'.
+	self assert: cbClassModel instVarNames equals: CBClass instVarNames.
+	self assertEmpty: (CBChangeSet new
+			 addClass: cbClassModel;
+			 refactoringChanges).
+	floatModel := CBClass fromClass: Float.
+	self assert: floatModel classVarNames equals: (Float classVariables collect: #name).
+	self assertEmpty: (CBChangeSet new
+			 addClass: floatModel;
+			 refactoringChanges).
+	cbClassModel addInstVarNamed: 'extraSlot'.
+	builder := CBDummyShiftClassBuilder new.
+	cbClassModel classDefinition value: builder.
+	self assertCollection: (builder slots collect: #name) equals: CBClass instVarNames , #( #extraSlot )
+]
+
+{ #category : 'tests' }
 CBClassTest >> testFromRealClassWithRootTag [
 
 	| realClass |
@@ -280,17 +319,11 @@ CBClassTest >> testParent [
 { #category : 'tests' }
 CBClassTest >> testPrintOn [
 
-	| multiVarOutput |
 	class addMethod: (CBMethod new getter: 'first').
 	class addInstVarNamed: 'first'.
 	self assert: class printString equals: 'a CBClass(''MyXXTestClass'', a(first),m(1))'.
 	class addInstVarNamed: 'second'.
-	multiVarOutput := class printString.
-	self
-		assert:
-			(#( 'a CBClass(''MyXXTestClass'', a(first,second),m(1))' 'a CBClass(''MyXXTestClass'', a(second,first),m(1))' ) includes:
-				 multiVarOutput)
-		description: 'printOn: should separate multiple instance variables with commas'
+	self assert: class printString equals: 'a CBClass(''MyXXTestClass'', a(first,second),m(1))'
 ]
 
 { #category : 'tests - accessing' }
