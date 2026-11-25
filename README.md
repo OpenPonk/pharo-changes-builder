@@ -41,7 +41,7 @@ setter := CBMethod new
 init := CBMethod new
 	source: 'initialize
 	size := 0';
-	protocol: 'initialization'.
+	protocolName: 'initialization'.
 
 cls addMethod: getter.
 cls addMethod: setter.
