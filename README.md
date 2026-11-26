@@ -1,13 +1,14 @@
 # Changes Builder
 
-A small wrapper library to simplify common RBRefactoring operations when generating code.
+[![Nightly](https://github.com/OpenPonk/pharo-changes-builder/actions/workflows/nightly.yml/badge.svg)](https://github.com/OpenPonk/pharo-changes-builder/actions/workflows/nightly.yml) [![Coverage Status](https://coveralls.io/repos/github/OpenPonk/pharo-changes-builder/badge.svg?branch=master)](https://coveralls.io/github/OpenPonk/pharo-changes-builder?branch=master)
 
-The main pupose is to prepare all code that you want to generate before hand and represent them as RBRefactorings, so you can review them before you accidentally break your system. ;)
+Lightweight wrapper library simplifying common `RBRefactoring` operations during programmatic code generation in Pharo.
 
-On top of the generation, this library also fixes couple RBRefactoring issues, where RBRefactoring would show (and try to execute) a change that doesn't actually change anything. We filter this out, so you see only actual changes.
-
+Code to be generated is represented as `RBRefactoring` changes so it can be reviewed before execution, with no-op changes automatically filtered out.
 
 ## Installation
+
+See [openponk.org/#direct-installation](https://openponk.org/#direct-installation) for the supported Pharo version.
 
 ```smalltalk
 Metacello new
@@ -31,13 +32,13 @@ cls parent: 'Object'.
 "add an instance variable"
 cls addInstVarNamed: 'size'.
 
-"getter: is a convenience method that will generate a basic accessor in 'accessing' protocl"
+"getter: generates a basic accessor in the 'accessing' protocol"
 getter := CBMethod new
 	getter: 'size'.
-"dtto for setter"
+"ditto for setter"
 setter := CBMethod new
 	setter: 'size' argument: 'Number' comment: 'specify a new size'.
-"'hand'-written source is also possible"
+"hand-written source is also possible"
 init := CBMethod new
 	source: 'initialize
 	size := 0';
@@ -50,8 +51,12 @@ cls addMethod: init.
 changeSet := CBChangeSet new.
 changeSet addClass: cls.
 
-"ChangesBrowser can also be used, but it throws error on empty changeset"
+"ChangesBrowser can also be used, but it raises an error on an empty changeset"
 ^ (CBChangesBrowser changes: changeSet refactoringChanges) open.
 ```
 
-![](docs/example-changes.png)
+![Changes Builder browser example](docs/example-changes.png)
+
+## Documentation
+
+Part of the [OpenPonk](https://openponk.org) platform. For architecture, the repository catalog, and contributing guidelines, see [`OpenPonk/.github`](https://github.com/OpenPonk/.github/blob/main/profile/README.md).
