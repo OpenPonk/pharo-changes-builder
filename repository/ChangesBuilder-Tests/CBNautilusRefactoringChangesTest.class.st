@@ -64,6 +64,20 @@ CBNautilusRefactoringChangesTest >> testAddMetaVarOnNewClassChanged [
 ]
 
 { #category : 'tests' }
+CBNautilusRefactoringChangesTest >> testChangesBrowserAcceptAbortsWhenNotOkToChange [
+
+	| browser |
+	browser := CBChangesBrowser changes: #(  ).
+	browser stub okToChange willReturn: false.
+	browser open.
+	[
+		self assert: browser window isOpen description: 'CBChangesBrowser should open a window'.
+		browser accept.
+		self assert: browser window isOpen description: 'CBChangesBrowser>>#accept should keep window open when okToChange is false' ]
+		ensure: [ browser window close ]
+]
+
+{ #category : 'tests' }
 CBNautilusRefactoringChangesTest >> testChangesBrowserAcceptAndBuildDiffFor [
 
 	| cls change browser |
